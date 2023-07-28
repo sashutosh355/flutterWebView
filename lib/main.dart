@@ -29,22 +29,33 @@ class _WebViewAppState extends State<WebViewApp> {
         NavigationDelegate(
           onNavigationRequest: (navigation) {
             if (navigation.url != url) {
-              return NavigationDecision.prevent;
+              return NavigationDecision.navigate;
             }
-            return NavigationDecision.navigate;
+            return NavigationDecision.prevent;
           },
         ),
       )
       ..loadRequest(Uri.parse(url));
     super.initState();
   }
+  
+  Future<bool> _handleBackNavigation() async {
+    if (await controller.canGoBack()) {
+      await controller.goBack();
+      return false;
+    }
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: WebViewWidget(
-          controller: controller,
+    return WillPopScope(
+      onWillPop: _handleBackNavigation,
+      child: Scaffold(
+        body: SafeArea(
+          child: WebViewWidget(
+            controller: controller,
+          ),
         ),
       ),
     );
